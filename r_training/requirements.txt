@@ -1,0 +1,8 @@
+gymnasium
+numpy
+stable-baselines3
+torch 
+onnx
+onnxscript
+onnxruntime
+matplotlib
