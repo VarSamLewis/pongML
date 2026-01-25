@@ -112,61 +112,41 @@ export class AIAgent {
     playerPaddle: Paddle
   ): Promise<'up' | 'down' | 'stay'> {
     if (!this.loaded || !this.model) {
-      // Fallback to basic AI if model not loaded
-      return this.basicAI(ball, aiPaddle);
+      throw new Error('AI model not loaded. Cannot play game.');
     }
 
-    try {
-      const observation = this.createObservation(ball, aiPaddle, playerPaddle);
+    const observation = this.createObservation(ball, aiPaddle, playerPaddle);
 
-      // Run inference with TensorFlow.js
-      const inputTensor = tf.tensor2d([Array.from(observation)], [1, 8]);
-      const output = this.model.predict(inputTensor) as tf.Tensor;
-      const actionLogits = await output.data();
+    // Run inference with TensorFlow.js
+    const inputTensor = tf.tensor2d([Array.from(observation)], [1, 8]);
+    const output = this.model.predict(inputTensor) as tf.Tensor;
+    const actionLogits = await output.data();
 
-      // Clean up tensors
-      inputTensor.dispose();
-      output.dispose();
+    // Clean up tensors
+    inputTensor.dispose();
+    output.dispose();
 
-      // Find the action with highest logit value
-      let maxIdx = 0;
-      let maxVal = actionLogits[0];
-      for (let i = 1; i < actionLogits.length; i++) {
-        if (actionLogits[i] > maxVal) {
-          maxVal = actionLogits[i];
-          maxIdx = i;
-        }
+    // Find the action with highest logit value
+    let maxIdx = 0;
+    let maxVal = actionLogits[0];
+    for (let i = 1; i < actionLogits.length; i++) {
+      if (actionLogits[i] > maxVal) {
+        maxVal = actionLogits[i];
+        maxIdx = i;
       }
-
-      // Map action index to movement
-      // 0 = up, 1 = stay, 2 = down
-      switch (maxIdx) {
-        case 0:
-          return 'up';
-        case 1:
-          return 'stay';
-        case 2:
-          return 'down';
-        default:
-          return 'stay';
-      }
-    } catch (error) {
-      console.error('[AI] Error during inference:', error);
-      return this.basicAI(ball, aiPaddle);
     }
-  }
 
-  private basicAI(ball: Ball, aiPaddle: Paddle): 'up' | 'down' | 'stay' {
-    // Simple fallback AI - track ball position
-    const paddleCenter = aiPaddle.y + aiPaddle.height / 2;
-    const threshold = 5;
-
-    if (paddleCenter < ball.y - threshold) {
-      return 'down';
-    } else if (paddleCenter > ball.y + threshold) {
-      return 'up';
-    } else {
-      return 'stay';
+    // Map action index to movement
+    // 0 = up, 1 = stay, 2 = down
+    switch (maxIdx) {
+      case 0:
+        return 'up';
+      case 1:
+        return 'stay';
+      case 2:
+        return 'down';
+      default:
+        return 'stay';
     }
   }
 }

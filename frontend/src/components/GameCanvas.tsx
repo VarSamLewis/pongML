@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GameState, GAME_CONFIG } from '../game/types';
 
 interface GameCanvasProps {
@@ -7,6 +7,46 @@ interface GameCanvasProps {
 
 export function GameCanvas({ gameState }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: GAME_CONFIG.WIDTH, height: GAME_CONFIG.HEIGHT });
+
+  // Handle dynamic canvas sizing with debouncing
+  useEffect(() => {
+    let timeoutId: number;
+
+    const updateCanvasSize = () => {
+      // Clear any pending updates
+      if (timeoutId) clearTimeout(timeoutId);
+
+      // Debounce the update
+      timeoutId = window.setTimeout(() => {
+        if (!containerRef.current) return;
+
+        const padding = 64; // Account for padding
+        const maxWidth = window.innerWidth - padding;
+        const maxHeight = window.innerHeight - 350; // Leave space for UI elements
+
+        const aspectRatio = GAME_CONFIG.WIDTH / GAME_CONFIG.HEIGHT;
+        let width = Math.min(maxWidth, GAME_CONFIG.WIDTH); // Cap at original size
+        let height = width / aspectRatio;
+
+        // If height is too large, scale based on height instead
+        if (height > maxHeight) {
+          height = maxHeight;
+          width = height * aspectRatio;
+        }
+
+        setCanvasSize({ width, height });
+      }, 100); // 100ms debounce
+    };
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    return () => {
+      window.removeEventListener('resize', updateCanvasSize);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -131,16 +171,18 @@ export function GameCanvas({ gameState }: GameCanvasProps) {
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={GAME_CONFIG.WIDTH}
-      height={GAME_CONFIG.HEIGHT}
-      className="border-2 border-[#fbf0df] rounded-lg shadow-2xl"
-      style={{
-        maxWidth: '100%',
-        height: 'auto',
-        imageRendering: 'pixelated',
-      }}
-    />
+    <div ref={containerRef} className="w-full flex justify-center">
+      <canvas
+        ref={canvasRef}
+        width={GAME_CONFIG.WIDTH}
+        height={GAME_CONFIG.HEIGHT}
+        className="border-2 border-[#fbf0df] rounded-lg shadow-2xl"
+        style={{
+          width: `${canvasSize.width}px`,
+          height: `${canvasSize.height}px`,
+          imageRendering: 'auto',
+        }}
+      />
+    </div>
   );
 }

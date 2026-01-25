@@ -40,8 +40,8 @@ export interface GameDataSubmission {
 }
 
 export const GAME_CONFIG = {
-  WIDTH: 800,
-  HEIGHT: 600,
+  WIDTH: 1200,
+  HEIGHT: 800,
   PADDLE_WIDTH: 10,
   PADDLE_HEIGHT: 50,
   BALL_RADIUS: 8,

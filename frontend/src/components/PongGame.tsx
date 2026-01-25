@@ -25,6 +25,7 @@ export function PongGame() {
   });
 
   const [modelLoaded, setModelLoaded] = useState(false);
+  const [modelError, setModelError] = useState<string>('');
   const [submissionStatus, setSubmissionStatus] = useState<string>('');
 
   const frameDataRef = useRef<FrameData[]>([]);
@@ -35,7 +36,13 @@ export function PongGame() {
   // Load ONNX model on mount
   useEffect(() => {
     aiAgent.loadModel().then(() => {
-      setModelLoaded(aiAgent.isLoaded());
+      if (aiAgent.isLoaded()) {
+        setModelLoaded(true);
+      } else {
+        setModelError('Failed to load AI model. Please check console for errors.');
+      }
+    }).catch((error) => {
+      setModelError(`Error loading AI model: ${error.message}`);
     });
   }, []);
 
@@ -105,11 +112,23 @@ export function PongGame() {
       });
 
       // Run AI inference (async)
-      const aiDirection = await aiAgent.predict(
-        gameState.ball,
-        gameState.aiPaddle,
-        gameState.playerPaddle
-      );
+      let aiDirection: 'up' | 'down' | 'stay' = 'stay';
+      try {
+        aiDirection = await aiAgent.predict(
+          gameState.ball,
+          gameState.aiPaddle,
+          gameState.playerPaddle
+        );
+      } catch (error) {
+        console.error('[AI] Prediction failed:', error);
+        // Stop the game if model fails
+        setGameState((prev) => ({
+          ...prev,
+          status: 'gameover',
+          winner: null,
+        }));
+        return;
+      }
 
       setGameState((prevState) => {
         const newState = { ...prevState };
@@ -226,11 +245,17 @@ export function PongGame() {
       <div className="text-center">
         <h1 className="text-4xl font-bold text-[#fbf0df] mb-2">Pong ML</h1>
         <p className="text-[#f3d5a3] text-sm">
-          {modelLoaded ? 'AI Model Loaded ✓' : 'Loading AI Model...'}
+          {modelError ? `AI Model Error: ${modelError}` : modelLoaded ? 'AI Model Loaded ✓' : 'Loading AI Model...'}
         </p>
       </div>
 
       <GameCanvas gameState={gameState} />
+
+      {modelError && (
+        <div className="bg-[#1a1a1a] border-2 border-red-500 rounded-lg px-4 py-2 text-red-400 font-mono text-sm">
+          {modelError}
+        </div>
+      )}
 
       {submissionStatus && (
         <div className="bg-[#1a1a1a] border-2 border-[#f3d5a3] rounded-lg px-4 py-2 text-[#fbf0df] font-mono text-sm">
