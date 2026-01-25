@@ -1,12 +1,14 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
+from psycopg2.extras import register_uuid
 from pydantic import BaseModel
-from typing import List 
-import logging  
-import uuid 
+from typing import List
+import logging
+import uuid
 
-logger = logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -18,7 +20,7 @@ app.add_middleware(
 )
 
 class FrameData(BaseModel):
-    game_id: uuid.UUID,
+    game_id: uuid.UUID
     winner: str
     ball_x: float
     ball_y: float
@@ -40,18 +42,20 @@ async def recieve_game_data(data: GameDataSubmission):
         host="localhost",
         port="5432"
     )
+    # Register UUID adapter for psycopg2
+    register_uuid()
     cursor = conn.cursor()
 
     for frame in data.frames:
         try:
-            cursor.execute(""" 
-                INSERT INTO game_data (date, game_id, winner ,ball_x, ball_y, agent_y1, agent_y2, opp_y1, opp_y2)
-                VALUES (%s, $s, %s, ,%s, %s, %s, %s, %s, %s)
+            cursor.execute("""
+                INSERT INTO game_data (date, game_id, winner, ball_x, ball_y, agent_y1, agent_y2, opp_y1, opp_y2)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (data.date, frame.game_id, frame.winner, frame.ball_x, frame.ball_y, frame.agent_y1, frame.agent_y2, frame.opp_y1, frame.opp_y2))
         except Exception as e:
-            logger.error("Frame not written")
+            logger.error(f"Frame not written: {e}")
 
-    logger.info(f"{frame.ame_id} Frames inserted into DB")
+    logger.info(f"{frame.game_id} Frames inserted into DB")
     conn.commit()
     cursor.close()
     conn.close()

@@ -157,7 +157,7 @@ export function PongGame() {
     return () => {
       cancelAnimationFrame(animationFrameId.current);
     };
-  }, [gameState.status, gameState.ball, gameState.aiPaddle, gameState.playerPaddle, collectFrameData]);
+  }, [gameState.status, collectFrameData]);
 
   // Handle game over - submit data
   useEffect(() => {

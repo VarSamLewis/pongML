@@ -1,10 +1,23 @@
 import { serve } from "bun";
 import index from "./index.html";
+import { join } from "path";
 
 const server = serve({
   routes: {
-    // Serve index.html for all unmatched routes.
-    "/*": index,
+    // Serve static files from the public directory
+    "/tfjs_model/*": async (req) => {
+      const url = new URL(req.url);
+      const filePath = join(import.meta.dir, "..", "public", url.pathname);
+      const file = Bun.file(filePath);
+
+      if (await file.exists()) {
+        return new Response(file);
+      }
+      return new Response("Not found", { status: 404 });
+    },
+
+    // Serve index.html for the root route
+    "/": index,
 
     "/api/hello": {
       async GET(req) {
