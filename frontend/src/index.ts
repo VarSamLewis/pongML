@@ -4,10 +4,10 @@ import { join } from "path";
 
 const server = serve({
   routes: {
-    // Serve static files from the public directory
+    // Serve TFJS model from ml_deploy directory
     "/tfjs_model/*": async (req) => {
       const url = new URL(req.url);
-      const filePath = join(import.meta.dir, "..", "public", url.pathname);
+      const filePath = join(import.meta.dir, "..", "..", "ml_deploy", url.pathname);
       const file = Bun.file(filePath);
 
       if (await file.exists()) {

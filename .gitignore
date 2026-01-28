@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# ONNX files (obsolete - using TFJS)
+*.onnx
+*.onnx.data
+
+# Training artifacts
+*.zip
+*.png
+*.jpg
+*.jpeg
+
+# Model checkpoints (keep only current ones)
+models/
+checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Node.js (for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TensorFlow.js (keep the model output but ignore temp files)
+# Note: tfjs_model/ is kept in git as it's the deployed model
