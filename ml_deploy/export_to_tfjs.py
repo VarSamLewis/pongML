@@ -67,4 +67,5 @@ def export_to_tfjs(model_path="pong_agent", output_dir="tfjs_model"):
     print(f"  Expected output: {expected.numpy()}")
 
 if __name__ == "__main__":
-    export_to_tfjs("pong_agent", "tfjs_model")
+    # Model is in ml_training directory, output to ml_deploy
+    export_to_tfjs("../ml_training/pong_agent", "tfjs_model")
