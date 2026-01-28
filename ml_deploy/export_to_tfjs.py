@@ -3,6 +3,8 @@ import torch.nn as nn
 from stable_baselines3 import PPO
 import json
 import numpy as np
+import argparse
+import os
 
 class SimpleActionNet(nn.Module):
     """Wrapper to extract just the action network from PPO policy."""
@@ -48,7 +50,6 @@ def export_to_tfjs(model_path="pong_agent", output_dir="tfjs_model"):
     }
 
     # Save as JSON
-    import os
     os.makedirs(output_dir, exist_ok=True)
 
     with open(f"{output_dir}/model.json", "w") as f:
@@ -67,5 +68,36 @@ def export_to_tfjs(model_path="pong_agent", output_dir="tfjs_model"):
     print(f"  Expected output: {expected.numpy()}")
 
 if __name__ == "__main__":
-    # Model is in ml_training directory, output to ml_deploy
-    export_to_tfjs("../ml_training/pong_agent", "tfjs_model")
+    parser = argparse.ArgumentParser(
+        description="Export PPO model to TensorFlow.js format",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python export_to_tfjs.py ../ml_training/pong_agent
+  python export_to_tfjs.py path/to/model --output custom_output
+  python export_to_tfjs.py ../ml_training/pong_agent_post
+        """
+    )
+
+    parser.add_argument(
+        "model_path",
+        nargs="?",
+        default="../ml_training/pong_agent",
+        help="Path to the PPO model file (without .zip extension). Default: ../ml_training/pong_agent"
+    )
+
+    parser.add_argument(
+        "-o", "--output",
+        default="tfjs_model",
+        help="Output directory for the TFJS model. Default: tfjs_model"
+    )
+
+    args = parser.parse_args()
+
+    model_path = args.model_path
+
+    print(f"Model path: {model_path}")
+    print(f"Output directory: {args.output}")
+    print()
+
+    export_to_tfjs(model_path, args.output)
