@@ -1,9 +1,9 @@
-from training_script import PongModel, PongEnv
+from reinforcement_training import PongModel, PongEnv
 import time
 
 
 if __name__ == '__main__':
-    pong_model = PongModel.load_model("pong_agent")
+    pong_model = PongModel.load_model("pong_agent.zip")
 
     print("=" * 60)
     print("TESTING PHASE")

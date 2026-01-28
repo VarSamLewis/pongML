@@ -1,4 +1,4 @@
-from training_script import PongModel, PongEnv
+from reinforcement_training import PongModel, PongEnv
 from stable_baselines3.common.env_util import make_vec_env
 import matplotlib.pyplot as plt
 import time

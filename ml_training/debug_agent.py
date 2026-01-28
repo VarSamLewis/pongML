@@ -1,4 +1,4 @@
-from training_script import PongModel, PongEnv
+from reinforcement_training import PongModel, PongEnv
 import numpy as np
 
 print("="*60)

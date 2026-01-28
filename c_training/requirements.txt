@@ -1,0 +1,6 @@
+numpy
+stable-baselines3
+torch
+matplotlib
+psycopg2
+sqlalchemy
